@@ -6,9 +6,7 @@ ARG BUILD_DIR
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
                     binutils-aarch64-linux-gnu \
-                    cmake \
-                    g++ \
-                    gdc \
+                    gdc-aarch64-linux-gnu \
                     git \
                     make \
                     vim && \
