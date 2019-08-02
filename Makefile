@@ -1,38 +1,64 @@
-INSTALL_LOCATION:=/media/$(LOGNAME)/boot
-DC:=aarch64-linux-gnu-gdc
+CROSS_COMPILE:=aarch64-linux-gnu-
+DC=gdc
+AS:=as
+
+INSTALL_DIR:=/media/$(LOGNAME)/boot
+BUILD_DIR:=$(CURDIR)/build
+SRC_DIR:=$(CURDIR)/src
+
 CFLAGS=-nostdlib -nostartfiles
-AS:=aarch64-linux-gnu-as
-INCLUDES:=-Isrc/init/ -Isrc/
+LFLAGS=-nostdlib -nostartfiles
 
-all: kernel.img
+INCLUDES:=-I$(SRC_DIR) -I$(SRC_DIR)/tinyd
 
-%.o: %.d
-	$(DC) -o $@ $(AFLAGS) -c $<
+export CROSS_COMPILE
+export DC
 
-init.o: src/init/init.d
-	$(DC) $(CFLAGS) $(INCLUDES) -o init.o -c src/init/init.d
-gpio_arm.o: src/gpio/gpio_arm.d
-	$(DC) $(CFLAGS) $(INCLUDES) -o gpio_arm.o -c src/gpio/gpio_arm.d
-uart_rpi3.o: src/uart/uart_rpi3.d
-	$(DC) $(CFLAGS) $(INCLUDES) -o uart_rpi3.o -c src/uart/uart_rpi3.d
-start.o: src/start.s
-	aarch64-linux-gnu-as -o start.o src/start.s
+export BUILD_DIR
+export SRC_DIR
 
-out.elf: init.o gpio_arm.o uart_rpi3.o start.o kernel.ld
-	aarch64-linux-gnu-ld --no-undefined init.o gpio_arm.o uart_rpi3.o start.o -Map kernel.map -o out.elf -T kernel.ld
+export CFLAGS
+export LFLAGS
+export INCLUDES
 
-kernel.img: out.elf
-	aarch64-linux-gnu-objcopy out.elf -O binary kernel.img
+MODULES:=gpio init uart
+MODULE_OBJ = $(MODULES:%=$(BUILD_DIR)/%.mod)
 
-list: out.elf
-	aarch64-linux-gnu-objdump -d out.elf > out.list
+SRCS:=$(wildcard $(MODULES:%=$(SRC_DIR)/%/*.d))
+OBJS:=$(SRCS:$(SRC_DIR)%=$(BUILD_DIR)%)
+OBJS:=$(OBJS:%.d=%.o)
+.SECONDARY: $(OBJS)
+
+all: build $(BUILD_DIR)/kernel.img
+
+$(BUILD_DIR)/%.mod: MODULE_DIR=$(basename $@)
+$(BUILD_DIR)/%.mod: MODULE_DEP=$(filter $(MODULE_DIR)/%,$(OBJS))
+$(BUILD_DIR)/%.mod: $(MODULE_DEP)
+	$(info Building module ${MODULE_DIR} comprising: ${MODULE_DEP} )
+	cp -f Makefile.module $(MODULE_DIR)/Makefile
+	$(MAKE) -C $(MODULE_DIR) $(MODULE_DEP)
+	$(CROSS_COMPILE)$(DC) $(LFLAGS) -r -o $@ $(MODULE_DEP)
+
+$(BUILD_DIR)/start.o: $(SRC_DIR)/start.s
+	$(CROSS_COMPILE)$(AS) -o $@ $<
+
+$(BUILD_DIR)/out.elf: $(BUILD_DIR)/start.o $(MODULE_OBJ) kernel.ld
+	$(CROSS_COMPILE)ld --no-undefined -o $@ $(BUILD_DIR)/start.o $(MODULE_OBJ) -Map kernel.map -T kernel.ld
+
+$(BUILD_DIR)/kernel.img: $(BUILD_DIR)/out.elf
+	$(CROSS_COMPILE)objcopy $< -O binary $@
+
+out.list: $(BUILD_DIR)/out.elf
+	$(CROSS_COMPILE)objdump -d $(BUILD_DIR)/out.elf > out.list
+
+build:
+	mkdir $(BUILD_DIR) $(MODULES:%=$(BUILD_DIR)/%)
 
 clean:
-	rm -rf	kernel.img \
+	rm -rf $(BUILD_DIR) \
 		*.elf \
 		*.list \
 		*.map \
-		*.o \
 
-install: kernel.img
-	cp kernel.img $(INSTALL_LOCATION)/kernel8.img
+install: $(BUILD_DIR)/kernel.img
+	cp $(BUILD_DIR)/kernel.img $(INSTALL_DIR)/kernel8.img

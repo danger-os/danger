@@ -1,0 +1,6 @@
+dummy:
+
+%.o: OBJ=$@
+%.o: SRC=$(OBJ:$(BUILD_DIR)/%.o=$(SRC_DIR)/%.d)
+%.o: $(SRC)
+	$(CROSS_COMPILE)$(DC) $(CFLAGS) $(INCLUDES) -o $@ -c $(SRC)

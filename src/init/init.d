@@ -14,15 +14,15 @@ extern(C) @nogc nothrow @trusted void main()
     set_mode(16, GPIO_FSEL_MODE.OUT);
     set_mode(29, GPIO_FSEL_MODE.OUT);
 
-    uart_setup(9600);
+    // uart_setup(9600);
 
     bool led = false;
     while (true)
     {
-        uart_put_byte('H');
-        uart_put_byte('I');
-        uart_put_byte(' ');
-        uart_put_byte('\r');
+        // uart_put_byte('H');
+        // uart_put_byte('I');
+        // uart_put_byte(' ');
+        // uart_put_byte('\r');
 
         write(16, led);
         write(29, led);
