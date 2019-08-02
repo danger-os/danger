@@ -28,10 +28,10 @@ extern(C) @nogc nothrow @trusted void main()
     bool led = false;
     while (true)
     {
-        //uart_put_byte('H');
-        //uart_put_byte('I');
-        //uart_put_byte(' ');
-        //uart_put_byte('\r');
+        // uart_put_byte('H');
+        // uart_put_byte('I');
+        // uart_put_byte(' ');
+        // uart_put_byte('\r');
 
         //write(16, led);
         //write(29, led);
