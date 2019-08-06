@@ -18,31 +18,27 @@ extern(C) @nogc nothrow @trusted void main()
         while(true) {} // Spin if we are not cpu 0
     }
 
-    *(cast(uint*)GPIO_FSEL.FSEL1) = 0x0000;
     // Set GPIO16 to OUTPUT
     set_mode(16, GPIO_FSEL_MODE.OUT);
     set_mode(29, GPIO_FSEL_MODE.OUT);
 
-    // uart_setup(9600);
+     uart_setup(9600);
 
     bool led = false;
+
+    uart_put_byte('H');
+    uart_put_byte('I');
+    uart_put_byte(' ');
+    uart_put_byte('\n');
+
     while (true)
     {
-        // uart_put_byte('H');
-        // uart_put_byte('I');
-        // uart_put_byte(' ');
-        // uart_put_byte('\r');
+        uart_put_byte(uart_get_byte());
 
-        //write(16, led);
-        //write(29, led);
-        leak_byte(*(GPIO_FSEL.FSEL1+3), 29);
-        delay(4000000);
-        leak_byte(*(GPIO_FSEL.FSEL1+2), 29);
-        delay(4000000);
-        leak_byte(*(GPIO_FSEL.FSEL1+1), 29);
-        delay(4000000);
-        leak_byte(*(GPIO_FSEL.FSEL1), 29);
-        delay(16000000);
+        write(16, led);
+        write(29, led);
+        delay(2000000);
+
         led = !led;
     }
 
