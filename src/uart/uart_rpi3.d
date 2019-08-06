@@ -32,10 +32,10 @@ enum UART_LSR_MASK : uint
     set_mode(14, GPIO_FSEL_MODE.ALT5);
     set_mode(15, GPIO_FSEL_MODE.ALT5);
 
-    // Enable uart
-    *cast(uint*)UART_ENABLES |= 1; //TODO make more explicit
     // Disable Tx and Rx
     *cast(uint*)UART_CNTL = 0;
+    // Enable uart
+    *cast(uint*)UART_ENABLES |= 1; //TODO make more explicit
     // 8-bit mode
     *cast(uint*)UART_LCR |= 1; //TODO more explicit
     // Set baudrate
