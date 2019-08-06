@@ -53,7 +53,17 @@ enum UART_LSR_MASK : uint
 {
     // Wait until there is space in the buffer
     while(!(*UART_LSR & UART_LSR_MASK.TX_EMPTY)) {}
-    *cast(uint*)UART_IO = cast(uint)b; // Only works little endian
+    *cast(uint*)UART_IO = cast(uint)b;
     // (we are assigning the LSbyte of the IO register)
+}
+
+@nogc nothrow @trusted byte uart_get_byte()
+{
+    byte b;
+    // Wait until there is data
+    while(!(*UART_LSR & UART_LSR_MASK.DATA_READY)) {}
+    b = cast(byte)(*cast(uint*)UART_IO & 0xff);
+    // (we are assigning the LSbyte of the IO register)
+    return b;
 }
 
