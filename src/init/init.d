@@ -29,6 +29,11 @@ extern(C) @nogc nothrow @trusted void main()
     uart_put_byte('H');
     uart_put_byte('I');
     uart_put_byte(' ');
+    uart_put_byte('T');
+    uart_put_byte('H');
+    uart_put_byte('E'); 
+    uart_put_byte('R');
+    uart_put_byte('E');
     uart_put_byte('\n');
 
     while (true)
