@@ -23,7 +23,7 @@ extern(C) @nogc nothrow @trusted void main()
     set_mode(16, GPIO_FSEL_MODE.OUT);
     set_mode(29, GPIO_FSEL_MODE.OUT);
 
-    //uart_setup(115200);
+    // uart_setup(9600);
 
     bool led = false;
     while (true)
