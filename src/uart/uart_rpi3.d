@@ -34,8 +34,10 @@ enum UART_LSR_MASK : uint
 
     // Enable uart
     *cast(uint*)UART_ENABLES |= 1; //TODO make more explicit
+    // Disable Tx and Rx
+    *cast(uint*)UART_CNTL = 0;
     // 8-bit mode
-    *cast(uint*)UART_LCR = 3; //TODO more explicit
+    *cast(uint*)UART_LCR |= 1; //TODO more explicit
     // Set baudrate
     *cast(uint*)UART_BAUD = baud_reg_value(baudrate);
 
@@ -51,7 +53,7 @@ enum UART_LSR_MASK : uint
 {
     // Wait until there is space in the buffer
     while(!(*UART_LSR & UART_LSR_MASK.TX_EMPTY)) {}
-    *cast(byte*)UART_IO = b; // Only works little endian
+    *cast(uint*)UART_IO = cast(uint)b; // Only works little endian
     // (we are assigning the LSbyte of the IO register)
 }
 

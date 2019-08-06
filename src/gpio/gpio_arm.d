@@ -60,7 +60,7 @@ enum GPIO_PUD_CLK_DELAY = 150;
 
     // set the (three) bits corresponding to pin
     int mask = (7 << (3 * r));
-    fn_sel_reg &= (!mask);
+    fn_sel_reg &= (~mask);
     fn_sel_reg |= ((7 & mode) << 3 * r);
 
     // write to register
@@ -78,4 +78,5 @@ enum GPIO_PUD_CLK_DELAY = 150;
     reg_add = cast(int*) (GPIO_BASE + 0x1C + (4 * q) + (!value * 12));
     *reg_add = (1 << r);
 }
+
 
