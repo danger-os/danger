@@ -1,64 +1,72 @@
+# Top-level Makefile that orchestrates the build process
+# Invokes Makefile2 in the build folder
+# Makefile2 invokes Makefile.module on each module to be built
+# Makefile.module compiles and links the kernel module from src/$(MODULE_NAME)/*.d
+
+# Toolchain configuration
 CROSS_COMPILE:=aarch64-linux-gnu-
 DC=gdc
 AS:=as
 
+# Build environment configuration
 INSTALL_DIR:=/media/$(LOGNAME)/boot
-BUILD_DIR:=$(CURDIR)/build
-SRC_DIR:=$(CURDIR)/src
+BUILD_DIRNAME:=build
+SOURCE_DIRNAME:=src
+BUILD_DIR:=$(CURDIR)/$(BUILD_DIRNAME)
+SOURCE_DIR:=$(CURDIR)/$(SOURCE_DIRNAME)
 
+# Toolchain flags
 CFLAGS=-nostdlib -nostartfiles
 LFLAGS=-nostdlib -nostartfiles
 
-INCLUDES:=-I$(SRC_DIR) -I$(SRC_DIR)/tinyd
+INCLUDES:=-I$(SOURCE_DIR) -I$(SOURCE_DIR)/tinyd
 
+# Modules to build by default
+MODULES:=gpio init uart cpu
+
+# Resolve module objects in build directory
+MODULE_OBJECTS = $(MODULES:%=%.mod)
+
+# Export variables to subdirectory make invocation
 export CROSS_COMPILE
 export DC
 
 export BUILD_DIR
-export SRC_DIR
+export SOURCE_DIR
 
 export CFLAGS
 export LFLAGS
 export INCLUDES
 
-MODULES:=gpio init uart
-MODULE_OBJ = $(MODULES:%=$(BUILD_DIR)/%.mod)
+export MODULES
+export MODULE_OBJECTS
 
-SRCS:=$(wildcard $(MODULES:%=$(SRC_DIR)/%/*.d))
-OBJS:=$(SRCS:$(SRC_DIR)%=$(BUILD_DIR)%)
-OBJS:=$(OBJS:%.d=%.o)
-.SECONDARY: $(OBJS)
+# Enumerate D language source files and populate object targets
+D_SOURCES:=$(wildcard $(MODULES:%=$(SOURCE_DIRNAME)/%/*.d))
+D_OBJECTS:=$(D_SOURCES:$(SOURCE_DIRNAME)/%=%)
+D_OBJECTS:=$(D_OBJECTS:%.d=%.o)
+.SECONDARY: $(D_OBJECTS)
+export D_OBJECTS
 
-all: build $(BUILD_DIR)/kernel.img
+# Default build target: build directory and kernel image
+all: $(BUILD_DIRNAME)/kernel.img
 
-$(BUILD_DIR)/%.mod: MODULE_DIR=$(basename $@)
-$(BUILD_DIR)/%.mod: MODULE_DEP=$(filter $(MODULE_DIR)/%,$(OBJS))
-$(BUILD_DIR)/%.mod: $(MODULE_DEP)
-	$(info Building module ${MODULE_DIR} comprising: ${MODULE_DEP} )
-	cp -f Makefile.module $(MODULE_DIR)/Makefile
-	$(MAKE) -C $(MODULE_DIR) $(MODULE_DEP)
-	$(CROSS_COMPILE)$(DC) $(LFLAGS) -r -o $@ $(MODULE_DEP)
+dump: $(BUILD_DIRNAME)/kernel.img
+	$(CROSS_COMPILE)objdump -d $(BUILD_DIRNAME)/kernel.img > dump
 
-$(BUILD_DIR)/start.o: $(SRC_DIR)/start.s
-	$(CROSS_COMPILE)$(AS) -o $@ $<
+.PHONY: $(BUILD_DIRNAME)/kernel.img
+$(BUILD_DIRNAME)/kernel.img: $(BUILD_DIR)
+	$(info Making kernel...)
+	$(MAKE) -C $(BUILD_DIR) -f "../Makefile2" kernel.img
 
-$(BUILD_DIR)/out.elf: $(BUILD_DIR)/start.o $(MODULE_OBJ) kernel.ld
-	$(CROSS_COMPILE)ld --no-undefined -o $@ $(BUILD_DIR)/start.o $(MODULE_OBJ) -Map kernel.map -T kernel.ld
+.PHONY: $(BUILD_DIR)
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR) $(MODULES:%=$(BUILD_DIR)/%)
 
-$(BUILD_DIR)/kernel.img: $(BUILD_DIR)/out.elf
-	$(CROSS_COMPILE)objcopy $< -O binary $@
-
-out.list: $(BUILD_DIR)/out.elf
-	$(CROSS_COMPILE)objdump -d $(BUILD_DIR)/out.elf > out.list
-
-build:
-	mkdir $(BUILD_DIR) $(MODULES:%=$(BUILD_DIR)/%)
-
+.PHONY: clean
 clean:
-	rm -rf $(BUILD_DIR) \
-		*.elf \
-		*.list \
-		*.map \
+	rm -rf $(BUILD_DIR) dump
 
-install: $(BUILD_DIR)/kernel.img
+.PHONY: install
+install: $(BUILD_DIRNAME)/kernel.img
 	cp $(BUILD_DIR)/kernel.img $(INSTALL_DIR)/kernel8.img

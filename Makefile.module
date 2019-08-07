@@ -1,6 +1,8 @@
-dummy:
+# Makefile.module compiles each module from its component object files
 
-%.o: OBJ=$@
-%.o: SRC=$(OBJ:$(BUILD_DIR)/%.o=$(SRC_DIR)/%.d)
-%.o: $(SRC)
-	$(CROSS_COMPILE)$(DC) $(CFLAGS) $(INCLUDES) -o $@ -c $(SRC)
+$(MODULE_NAME).mod: $(MODULE_D_OBJECTS)
+	$(CROSS_COMPILE)$(DC) $(LFLAGS) -r -o $@ $(MODULE_D_OBJECTS)
+
+$(MODULE_NAME)/%.o: $(SOURCE_DIR)/$(MODULE_NAME)/%.d
+	$(CROSS_COMPILE)$(DC) $(CFLAGS) $(INCLUDES) -o $@ -c $<
+

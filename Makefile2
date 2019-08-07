@@ -1,0 +1,33 @@
+# Makefile2 is invoked in the build folder
+# Makefile2 invokes Makefile.module on each module to be built
+
+export SOURCE_DIR
+
+# Kernel images
+out.elf: start.o $(MODULE_OBJECTS) ../kernel.ld
+	$(info Building kernel image with $(MODULE_OBJECTS))
+	$(CROSS_COMPILE)ld --no-undefined -o $@ start.o $(MODULE_OBJECTS) -Map kernel.map -T ../kernel.ld
+
+kernel.img: out.elf
+	$(CROSS_COMPILE)objcopy $< -O binary $@
+
+# Build kernel entry point
+start.o: $(SOURCE_DIR)/start.s
+	$(CROSS_COMPILE)$(AS) -o $@ $<
+
+# Build kernel module from objects in subdirectory using Makefile.module
+%.mod: export MODULE_NAME=$(basename $@)
+%.mod: export MODULE_D_OBJECTS=$(filter $(MODULE_NAME)/%,$(D_OBJECTS))
+%.mod: .FORCE
+	$(info Building module ${MODULE_BUILD_DIR} for ${@})
+	$(info Prerequisites: [${MODULE_D_OBJECTS}])
+	$(MAKE) -f ../Makefile.module $(MODULE_NAME).mod
+
+# FORCE target rebuild
+.FORCE:
+	
+
+# Default rule to catch last-resort pattern matching 
+%::
+	
+
