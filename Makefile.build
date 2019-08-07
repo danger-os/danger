@@ -3,11 +3,12 @@
 
 export SOURCE_DIR
 
-# Kernel images
+# Kernel ELF
 out.elf: start.o $(MODULE_OBJECTS) ../kernel.ld
 	$(info Building kernel image with $(MODULE_OBJECTS))
 	$(CROSS_COMPILE)ld --no-undefined -o $@ start.o $(MODULE_OBJECTS) -Map kernel.map -T ../kernel.ld
 
+# Kernel image
 kernel.img: out.elf
 	$(CROSS_COMPILE)objcopy $< -O binary $@
 
@@ -17,11 +18,12 @@ start.o: $(SOURCE_DIR)/start.s
 
 # Build kernel module from objects in subdirectory using Makefile.module
 %.mod: export MODULE_NAME=$(basename $@)
-%.mod: export MODULE_D_OBJECTS=$(filter $(MODULE_NAME)/%,$(D_OBJECTS))
+%.mod: MODULE_OBJECTS=$(filter $(MODULE_NAME)/%,$(D_OBJECTS))
+%.mod: export MODULE_D_OBJECTS=$(MODULE_OBJECTS:$(MODULE_NAME)/%=%)
 %.mod: .FORCE
 	$(info Building module ${MODULE_BUILD_DIR} for ${@})
 	$(info Prerequisites: [${MODULE_D_OBJECTS}])
-	$(MAKE) -f ../Makefile.module $(MODULE_NAME).mod
+	$(MAKE) -C $(MODULE_NAME) -f $(PROJECT_DIR)/Makefile.module ../$(MODULE_NAME).mod
 
 # FORCE target rebuild
 .FORCE:

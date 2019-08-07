@@ -2,7 +2,7 @@
 
 # Docker Image Properties
 IMAGE_NAME=danger-os/builder
-IMAGE_VERSION=unstable
+IMAGE_VERSION=dangerous
 IMAGE_TAG=$IMAGE_PREFIX$IMAGE_VERSION
 
 # Configure properties
