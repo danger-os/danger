@@ -80,11 +80,19 @@ extern(C) @nogc nothrow @trusted void main()
     while (true)
     {
         c = 'A';
-        for(i = 0; i < 32 && c != '\n'; i++)
+        uart_put_byte('>');
+        uart_put_byte(' ');
+
+        for(i = 0; i < 32 && c != '\r' && c != '\n'; i++)
         {
             c = uart_get_byte();
-            uart_put_byte(c);
-            buffer[i] = c;
+            if (c == '\r' || c == '\n') {
+                uart_put_byte('\r');
+                uart_put_byte('\n');
+            } else {
+                uart_put_byte(c);
+                buffer[i] = c;
+            }
         }
         if(buffer[0] == 'd' &&
            buffer[1] == 'u' &&
@@ -101,7 +109,6 @@ extern(C) @nogc nothrow @trusted void main()
             {
                 // Error
                 uart_put_byte('E');
-                uart_put_byte('\n');
             }
             else
             {
@@ -124,6 +131,10 @@ extern(C) @nogc nothrow @trusted void main()
                 }
             }
         }
+
+        // Newline before prompt
+        uart_put_byte('\r');
+        uart_put_byte('\n');
     }
 
 }
