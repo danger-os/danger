@@ -1,5 +1,5 @@
 
-enum byte* UART_BASE = cast(byte*)0x3f215000;
+enum byte* UART_BASE    = cast(byte*)0x3f215000;
 enum byte* UART_ENABLES = cast(byte*)(cast(ulong)UART_BASE + cast(ulong)0x04);
 enum byte* UART_IO      = cast(byte*)(cast(ulong)UART_BASE + cast(ulong)0x40);
 enum byte* UART_LCR     = cast(byte*)(cast(ulong)UART_BASE + cast(ulong)0x4c);
@@ -12,8 +12,8 @@ enum uint OVERSAMPLE_RATE = 8;
 
 enum UART_LSR_MASK : uint
 {
-    TX_IDLE = 0x40,
-    TX_EMPTY = 0x20,
+    TX_IDLE    = 0x40,
+    TX_EMPTY   = 0x20,
     RX_OVERRUN = 0x02,
     DATA_READY = 0x01,
 }
@@ -65,5 +65,38 @@ enum UART_LSR_MASK : uint
     b = cast(byte)(*cast(uint*)UART_IO & 0xff);
     // (we are assigning the LSbyte of the IO register)
     return b;
+}
+
+ulong uart_get_echo_line(ubyte[] buffer) @nogc nothrow @trusted
+{
+    ulong i = 0;
+    byte c = 0;
+    for (i = 0; i < buffer.length; i++)
+    {
+        c = uart_get_byte();
+        
+        if (c == '\r' || c == '\n') {
+            uart_put_byte('\r');
+            uart_put_byte('\n');
+            break;
+        } else {
+            uart_put_byte(c);
+            buffer[i] = c;
+        }
+    }
+    return i;
+}
+
+void uart_put(ubyte[] buffer) @nogc nothrow @trusted
+{
+    foreach (ubyte c; buffer)
+    {
+        uart_put_byte(c);
+    }
+}
+
+void uart_put(string str) @nogc nothrow @trusted
+{
+    uart_put(cast(ubyte[]) str);
 }
 

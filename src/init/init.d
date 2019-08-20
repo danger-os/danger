@@ -38,21 +38,9 @@ extern(C) @nogc nothrow @trusted void main()
 
     uart_setup(9600);
 
-
-    uart_put_byte('H');
-    uart_put_byte('I');
-    uart_put_byte(' ');
-    uart_put_byte('T');
-    uart_put_byte('H');
-    uart_put_byte('E'); 
-    uart_put_byte('R');
-    uart_put_byte('E');
-    uart_put_byte('\r');
-    uart_put_byte('\n');
+    uart_put("HI THERE\r\n");
 
     ubyte buffer[64];
-    ubyte hex_addr[16];
-    ubyte hex_wd[16];
 
     int i;
     ubyte c;
@@ -79,21 +67,9 @@ extern(C) @nogc nothrow @trusted void main()
 
     while (true)
     {
-        c = 'A';
-        uart_put_byte('>');
-        uart_put_byte(' ');
-
-        for(i = 0; i < 32 && c != '\r' && c != '\n'; i++)
-        {
-            c = uart_get_byte();
-            if (c == '\r' || c == '\n') {
-                uart_put_byte('\r');
-                uart_put_byte('\n');
-            } else {
-                uart_put_byte(c);
-                buffer[i] = c;
-            }
-        }
+        uart_put("> ");
+        
+        ulong bytes_read = uart_get_echo_line(buffer);
 
         uint n = 0;
         for (n = 0; n < buffer.length; n++)
@@ -110,6 +86,7 @@ extern(C) @nogc nothrow @trusted void main()
         switch (cmd) {
             case "dump":
                 // Dump mem location
+                ubyte[16] hex_addr;
                 for (i = 0; i < 16 && is_hexchar(buffer[i + 5]); i++)
                 {
                     hex_addr[i] = buffer[i + 5];
@@ -121,23 +98,11 @@ extern(C) @nogc nothrow @trusted void main()
                 }
                 else
                 {
-                    ulong addr = 0;
-                    uint mem_word = 0xffffffff;
-                    for(i = 0; i < 16; i++)
-                    {
-                        addr <<= 4;
-                        addr |= hex_nyb(hex_addr[i]);
-                    }
-                    mem_word = *(cast(uint*)addr);
-                    for(i = 7; i >= 0; i--)
-                    {
-                        hex_wd[i] = nyb_hex(mem_word & 0xf);
-                        mem_word >>= 4;
-                    }
-                    for(i = 0; i < 8; i++)
-                    {
-                        uart_put_byte(hex_wd[i]);
-                    }
+                    import tinyd.memory;
+                    uint* address = cast(uint*) hex_to_address(hex_addr);
+                    ubyte[16] hex_buffer;
+                    address.print_32(hex_buffer);
+                    uart_put(hex_buffer);
                 }
                 break;
             case "test":
@@ -145,25 +110,19 @@ extern(C) @nogc nothrow @trusted void main()
                 table_desc desc;
                 desc._storage = 0;
                 desc.nstable = 1;
-                ulong* addr = cast(ulong*) &desc;
-                ulong mem_word = *addr;
-                for (i = 15; i >= 0; i--)
-                {
-                    hex_wd[i] = nyb_hex(mem_word & 0xf);
-                    mem_word >>= 4;
-                }
-                for (i = 0; i < 16; i++)
-                {
-                    uart_put_byte(hex_wd[i]);
-                }
+
+                import tinyd.memory;
+                ulong* address = cast(ulong*) &desc;
+                ubyte[16] hex_buffer;
+                address.print_64(hex_buffer);
+                uart_put(hex_buffer);
             break;
             default:
             break;
         }
 
         // Newline before prompt
-        uart_put_byte('\r');
-        uart_put_byte('\n');
+        uart_put("\r\n");
     }
 
 }
