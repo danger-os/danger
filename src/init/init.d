@@ -52,7 +52,7 @@ extern(C) @nogc nothrow @trusted void main()
 
     ubyte buffer[64];
     ubyte hex_addr[16];
-    ubyte hex_wd[8];
+    ubyte hex_wd[16];
 
     int i;
     ubyte c;
@@ -94,42 +94,71 @@ extern(C) @nogc nothrow @trusted void main()
                 buffer[i] = c;
             }
         }
-        if(buffer[0] == 'd' &&
-           buffer[1] == 'u' &&
-           buffer[2] == 'm' &&
-           buffer[3] == 'p' &&
-           buffer[4] == ' ')
+
+        uint n = 0;
+        for (n = 0; n < buffer.length; n++)
         {
-            // Dump mem location
-            for(i = 0; i < 16 && is_hexchar(buffer[i + 5]); i++)
+            if (buffer[n] == ' ' ||
+                buffer[n] == '\n' ||
+                buffer[n] == '\r')
             {
-                hex_addr[i] = buffer[i + 5];
+                break;
             }
-            if(i < 16)
-            {
-                // Error
-                uart_put_byte('E');
-            }
-            else
-            {
-                ulong addr = 0;
-                uint mem_word = 0xffffffff;
-                for(i = 0; i < 16; i++)
+        }
+
+        char[] cmd = cast(char[]) buffer[0..n];
+        switch (cmd) {
+            case "dump":
+                // Dump mem location
+                for (i = 0; i < 16 && is_hexchar(buffer[i + 5]); i++)
                 {
-                    addr <<= 4;
-                    addr |= hex_nyb(hex_addr[i]);
+                    hex_addr[i] = buffer[i + 5];
                 }
-                mem_word = *(cast(uint*)addr);
-                for(i = 7; i >= 0; i--)
+                if (i < 16)
+                {
+                    // Error
+                    uart_put_byte('E');
+                }
+                else
+                {
+                    ulong addr = 0;
+                    uint mem_word = 0xffffffff;
+                    for(i = 0; i < 16; i++)
+                    {
+                        addr <<= 4;
+                        addr |= hex_nyb(hex_addr[i]);
+                    }
+                    mem_word = *(cast(uint*)addr);
+                    for(i = 7; i >= 0; i--)
+                    {
+                        hex_wd[i] = nyb_hex(mem_word & 0xf);
+                        mem_word >>= 4;
+                    }
+                    for(i = 0; i < 8; i++)
+                    {
+                        uart_put_byte(hex_wd[i]);
+                    }
+                }
+                break;
+            case "test":
+                import vm.aarch64;
+                table_desc desc;
+                desc._storage = 0;
+                desc.x = 1;
+                ulong* addr = cast(ulong*) &desc;
+                ulong mem_word = *addr;
+                for (i = 15; i >= 0; i--)
                 {
                     hex_wd[i] = nyb_hex(mem_word & 0xf);
                     mem_word >>= 4;
                 }
-                for(i = 0; i < 8; i++)
+                for (i = 0; i < 16; i++)
                 {
                     uart_put_byte(hex_wd[i]);
                 }
-            }
+            break;
+            default:
+            break;
         }
 
         // Newline before prompt

@@ -23,7 +23,7 @@ LFLAGS=-nostdlib -nostartfiles
 INCLUDES:=-I$(SOURCE_DIR) -I$(SOURCE_DIR)/tinyd2
 
 # Modules to build by default
-MODULES:=gpio init uart cpu tinyd
+MODULES:=gpio init uart cpu tinyd vm
 
 # Resolve module objects in build directory
 MODULE_OBJECTS = $(MODULES:%=%.mod)
