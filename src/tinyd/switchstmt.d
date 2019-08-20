@@ -1,6 +1,7 @@
 module tinyd.switchstmt;
 
 extern(C):
+
 int _d_switch_string(char[][] table, char[] compare)
 {
     import tinyd.string;

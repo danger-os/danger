@@ -144,7 +144,7 @@ extern(C) @nogc nothrow @trusted void main()
                 import vm.aarch64;
                 table_desc desc;
                 desc._storage = 0;
-                desc.x = 1;
+                desc.nstable = 1;
                 ulong* addr = cast(ulong*) &desc;
                 ulong mem_word = *addr;
                 for (i = 15; i >= 0; i--)
