@@ -9,44 +9,54 @@ struct table_desc
     import tinyd.bitmanip;
     ulong _storage;
 
-    enum DESC_OFFSET : ubyte {
+    enum DESC_OFFSET : ubyte
+    {
         NSTABLE  = 63,
         APTABLE  = 61,
         XNTABLE  = 60,
         PXNTABLE = 59,
     }
-    enum DESC_LENGTH : ubyte {
+    enum DESC_LENGTH : ubyte
+    {
         NSTABLE  = 1,
         APTABLE  = 2,
         XNTABLE  = 1,
         PXNTABLE = 1,
     }
 
-    @property void nstable(bool nstable) @nogc nothrow @safe {
+    @property void nstable(bool nstable) @nogc nothrow @safe
+    {
         bitfield_set(&_storage, DESC_OFFSET.NSTABLE, DESC_LENGTH.NSTABLE, nstable);
     }
-    @property bool nstable() @nogc nothrow @safe {
+    @property bool nstable() @nogc nothrow @safe
+    {
         return cast(bool) bitfield_get(&_storage, DESC_OFFSET.NSTABLE, DESC_LENGTH.NSTABLE);
     }
 
-    @property void aptable(bool aptable) @nogc nothrow @safe {
+    @property void aptable(bool aptable) @nogc nothrow @safe
+    {
         bitfield_set(&_storage, DESC_OFFSET.APTABLE, DESC_LENGTH.APTABLE, aptable);
     }
-    @property bool aptable() @nogc nothrow @safe {
+    @property bool aptable() @nogc nothrow @safe
+    {
         return cast(bool) bitfield_get(&_storage, DESC_OFFSET.APTABLE, DESC_LENGTH.APTABLE);
     }
 
-    @property void xntable(bool xntable) @nogc nothrow @safe {
+    @property void xntable(bool xntable) @nogc nothrow @safe
+    {
         bitfield_set(&_storage, DESC_OFFSET.XNTABLE, DESC_LENGTH.XNTABLE, xntable);
     }
-    @property bool xntable() @nogc nothrow @safe {
+    @property bool xntable() @nogc nothrow @safe
+    {
         return cast(bool) bitfield_get(&_storage, DESC_OFFSET.XNTABLE, DESC_LENGTH.XNTABLE);
     }
 
-    @property void pxntable(bool pxntable) @nogc nothrow @safe {
+    @property void pxntable(bool pxntable) @nogc nothrow @safe
+    {
         bitfield_set(&_storage, DESC_OFFSET.PXNTABLE, DESC_LENGTH.PXNTABLE, pxntable);
     }
-    @property bool pxntable() @nogc nothrow @safe {
+    @property bool pxntable() @nogc nothrow @safe
+    {
         return cast(bool) bitfield_get(&_storage, DESC_OFFSET.PXNTABLE, DESC_LENGTH.PXNTABLE);
     }
 }
