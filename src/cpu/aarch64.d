@@ -26,3 +26,14 @@ module aarch64;
     return cpu_id;
 }
 
+@nogc nothrow @trusted ulong get_exception_level()
+{
+    ulong e_level;
+    asm
+    {
+        "mrs %[el], currentel"
+        : [el] "=r" e_level;
+    }
+    e_level >>= 2; // Bits [3:2] contain exception level
+    return e_level;
+}
