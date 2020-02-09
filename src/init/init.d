@@ -117,7 +117,22 @@ extern(C) @nogc nothrow @trusted void main()
                 address.print_64(hex_buffer);
                 uart_put(hex_buffer);
             break;
+            case "elvl":
+                import tinyd.memory;
+                ulong elvl = get_exception_level();
+                ubyte[16] e_level_hex;
+                (&elvl).print_64(e_level_hex);
+                uart_put(e_level_hex);
+            break;
+            case "cpun":
+                import tinyd.memory;
+                ulong cpun = get_cpu_id();
+                ubyte[16] cpu_num_hex;
+                (&cpun).print_64(cpu_num_hex);
+                uart_put(cpu_num_hex);
+            break;
             default:
+                uart_put_byte('E');
             break;
         }
 
