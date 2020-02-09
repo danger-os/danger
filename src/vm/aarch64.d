@@ -54,13 +54,13 @@ struct table_entry
         return cast(bool) bitfield_get(&_storage, DESC_OFFSET.NSTABLE, DESC_LENGTH.NSTABLE);
     }
 
-    @property void aptable(bool aptable) @nogc nothrow @safe
+    @property void aptable(ubyte aptable) @nogc nothrow @safe
     {
         bitfield_set(&_storage, DESC_OFFSET.APTABLE, DESC_LENGTH.APTABLE, aptable);
     }
-    @property bool aptable() @nogc nothrow @safe
+    @property ubyte aptable() @nogc nothrow @safe
     {
-        return cast(bool) bitfield_get(&_storage, DESC_OFFSET.APTABLE, DESC_LENGTH.APTABLE);
+        return cast(ubyte) bitfield_get(&_storage, DESC_OFFSET.APTABLE, DESC_LENGTH.APTABLE);
     }
 
     @property void xntable(bool xntable) @nogc nothrow @safe
@@ -130,7 +130,7 @@ struct table_entry
     {
         bitfield_set(&_storage, DESC_OFFSET.SHAREABILITY, DESC_LENGTH.SHAREABILITY, shareability);
     }
-    @property ubyte shareability(ubyte shareability) @nogc nothrow @safe
+    @property ubyte shareability() @nogc nothrow @safe
     {
         return cast(ubyte) bitfield_get(&_storage, DESC_OFFSET.SHAREABILITY, DESC_LENGTH.SHAREABILITY);
     }
@@ -139,7 +139,7 @@ struct table_entry
     {
         bitfield_set(&_storage, DESC_OFFSET.ACCESSPERMISSIONS, DESC_LENGTH.ACCESSPERMISSIONS, accesspermissions);
     }
-    @property ubyte accesspermissions(ubyte accesspermissions) @nogc nothrow @safe
+    @property ubyte accesspermissions() @nogc nothrow @safe
     {
         return cast(ubyte) bitfield_get(&_storage, DESC_OFFSET.ACCESSPERMISSIONS, DESC_LENGTH.ACCESSPERMISSIONS);
     }
@@ -157,7 +157,7 @@ struct table_entry
     {
         bitfield_set(&_storage, DESC_OFFSET.ATTRINDEX, DESC_LENGTH.ATTRINDEX, attrindex);
     }
-    @property ubyte attrindex(ubyte attrindex) @nogc nothrow @safe
+    @property ubyte attrindex() @nogc nothrow @safe
     {
         return cast(ubyte) bitfield_get(&_storage, DESC_OFFSET.ATTRINDEX, DESC_LENGTH.ATTRINDEX);
     }
