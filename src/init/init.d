@@ -107,7 +107,7 @@ extern(C) @nogc nothrow @trusted void main()
                 break;
             case "test":
                 import vm.aarch64;
-                table_desc desc;
+                table_entry desc;
                 desc._storage = 0;
                 desc.nstable = 1;
 
