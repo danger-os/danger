@@ -78,6 +78,12 @@ ulong uart_get_echo_line(ubyte[] buffer) @nogc nothrow @trusted
         if (c == '\r' || c == '\n') {
             uart_put_byte('\r');
             uart_put_byte('\n');
+
+            buffer[i] = '\r';
+            i++;
+            buffer[i] = '\n';
+            i++;
+
             break;
         } else {
             uart_put_byte(c);
